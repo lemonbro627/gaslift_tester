@@ -162,7 +162,10 @@ class Main(QWidget):
     def __init__(self):
         super().__init__()
         self.serial = serial.Serial(config.SERIAL_PORT, config.SERIAL_SPEED)
-        print(self.serial)
+        self.serial.setDTR(False)
+        time.sleep(1)
+        self.serial.flushInput()
+        self.serial.setDTR(True)
 
 
         self.start_stop_btn = QPushButton('START', self)
