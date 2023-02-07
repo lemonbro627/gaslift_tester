@@ -1,17 +1,18 @@
 import time
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QLabel, QCheckBox
-from PyQt5.QtGui import QPainter, QPen, QColor
-from PyQt5.QtCore import Qt, QObject, QThread, pyqtSignal
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5 import QtCore
 import queue
 import serial
 import sys
-from os import path, mkdir
+import os
 import config
 from datetime import datetime as dt
 
+if not os.path.exists('logs'):
+    os.mkdir('logs')
 global filename
-filename = f'test_{dt.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
+filename = f'logs/test_{dt.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
 
 global piston_master
 piston_master = {
@@ -86,7 +87,13 @@ class CheckData(QThread):
                 self.serial.write('4'.encode('ascii'))
             if piston_master['p5'] == 'on':
                 self.serial.write('5'.encode('ascii'))
+            with open(filename, 'a') as f:
+                f.write(
+                    f"{dt.now()};SLEEP AFTER START\n")
             time.sleep(config.SLEEP_AFTER_START)
+            with open(filename, 'a') as f:
+                f.write(
+                    f"{dt.now()};START MEASURING\n")
             if not q.empty():
                 data = q.get_nowait()
                 print(f'piston_master: {piston_master}')
@@ -137,6 +144,10 @@ class CheckData(QThread):
                         piston_master['p5'] = 'on'
                         self.p5.emit()
 
+                with open(filename, 'a') as f:
+                    f.write(
+                        f"{dt.now()};STOP MEASURING\n")
+
                 if piston_master['p1'] == 'on':
                     self.serial.write('1'.encode('ascii'))
                 if piston_master['p2'] == 'on':
@@ -147,6 +158,9 @@ class CheckData(QThread):
                     self.serial.write('4'.encode('ascii'))
                 if piston_master['p5'] == 'on':
                     self.serial.write('5'.encode('ascii'))
+            with open(filename, 'a') as f:
+                f.write(
+                    f"{dt.now()};START SLEEP AFTER CHECK\n")
             time.sleep(config.SLEEP_AFTER_CHECK)
 
 
@@ -305,10 +319,16 @@ class Main(QWidget):
             self.start_stop_btn.setText('STOP')
             self.thread_check.start()
             self.thread_check.running = True
+            with open(filename, 'a') as f:
+                f.write(
+                    f"{dt.now()};START BUTTON PUSHED\n")
         elif self.start_stop_btn.text() == 'STOP':
             self.start_stop_btn.setText('START')
             self.thread_check.running = False
             self.thread_check.quit()
+            with open(filename, 'a') as f:
+                f.write(
+                    f"{dt.now()};STOP BUTTON PUSHED\n")
             if piston_master['p1'] == 'on':
                 self.serial.write('1'.encode('ascii'))
             if piston_master['p2'] == 'on':

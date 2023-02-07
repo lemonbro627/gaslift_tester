@@ -2,3 +2,4 @@ test*
 venv
 arduino
 .idea
+output
