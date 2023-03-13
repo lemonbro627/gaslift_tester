@@ -6,11 +6,29 @@ import queue
 import serial
 import sys
 import os
-import config
+import yaml
 from datetime import datetime as dt
+
+default_config = """MIN_WEIGHT_1: 2500
+MIN_WEIGHT_2: 2500
+MIN_WEIGHT_3: 2500
+MIN_WEIGHT_4: 2500
+MIN_WEIGHT_5: 2500
+SERIAL_SPEED: 9600
+SERIAL_PORT: COM3
+SLEEP_AFTER_START: 3
+SLEEP_AFTER_CHECK: 5"""
+
+if not os.path.exists("config.yaml"):
+    with open("config.yaml") as f:
+        f.write(default_config)
+
+with open("config.yaml") as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
 
 if not os.path.exists('logs'):
     os.mkdir('logs')
+
 global filename
 filename = f'logs/test_{dt.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv'
 
@@ -100,47 +118,47 @@ class CheckData(QThread):
                 print(f'data: {data}')
                 print(f'min: {config.MIN_WEIGHT}')
                 if piston_master['p1'] == 'on':
-                    if float(data[0]) < float(config.MIN_WEIGHT):
+                    if float(data[0]) < float(config['MIN_WEIGHT_1']):
                         piston_master['p1'] = 'off'
                         self.p1.emit()
                 elif piston_master['p1'] == 'off':
-                    if float(data[0]) > float(config.MIN_WEIGHT):
+                    if float(data[0]) > float(config['MIN_WEIGHT_1']):
                         piston_master['p1'] = 'on'
                         self.p1.emit()
 
                 if piston_master['p2'] == 'on':
-                    if float(data[1]) < float(config.MIN_WEIGHT):
+                    if float(data[1]) < float(config['MIN_WEIGHT_2']):
                         piston_master['p2'] = 'off'
                         self.p2.emit()
                 elif piston_master['p2'] == 'off':
-                    if float(data[1]) > float(config.MIN_WEIGHT):
+                    if float(data[1]) > float(config['MIN_WEIGHT_2']):
                         piston_master['p2'] = 'on'
                         self.p2.emit()
 
                 if piston_master['p3'] == 'on':
-                    if float(data[2]) < float(config.MIN_WEIGHT):
+                    if float(data[2]) < float(config['MIN_WEIGHT_3']):
                         piston_master['p3'] = 'off'
                         self.p3.emit()
                 elif piston_master['p3'] == 'off':
-                    if float(data[2]) > float(config.MIN_WEIGHT):
+                    if float(data[2]) > float(config['MIN_WEIGHT_3']):
                         piston_master['p3'] = 'on'
                         self.p3.emit()
 
                 if piston_master['p4'] == 'on':
-                    if float(data[3]) < float(config.MIN_WEIGHT):
+                    if float(data[3]) < float(config['MIN_WEIGHT_4']):
                         piston_master['p4'] = 'off'
                         self.p4.emit()
                 elif piston_master['p4'] == 'off':
-                    if float(data[3]) > float(config.MIN_WEIGHT):
+                    if float(data[3]) > float(config['MIN_WEIGHT_4']):
                         piston_master['p4'] = 'on'
                         self.p4.emit()
 
                 if piston_master['p5'] == 'on':
-                    if float(data[4]) < float(config.MIN_WEIGHT):
+                    if float(data[4]) < float(config['MIN_WEIGHT_5']):
                         piston_master['p5'] = 'off'
                         self.p5.emit()
                 elif piston_master['p5'] == 'off':
-                    if float(data[4]) > float(config.MIN_WEIGHT):
+                    if float(data[4]) > float(config['MIN_WEIGHT_5']):
                         piston_master['p5'] = 'on'
                         self.p5.emit()
 
