@@ -3,3 +3,5 @@ venv
 arduino
 .idea
 output
+logs
+*.zip
